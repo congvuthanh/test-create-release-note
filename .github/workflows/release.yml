@@ -1,0 +1,51 @@
+name: create release note
+
+on: [workflow_dispatch]
+
+jobs:
+  create-release-note:
+    name: Create release note
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Generate release tag for main
+        id: generate_main_release_tag
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: amitsingh-007/next-release-tag@v5.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: 'main-v'
+          tag_template: 'yyyy.mm.dd.i'
+      - name: Create release note for main
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: actions/github-script@v4.0.2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            await github.request(`POST /repos/${{ github.repository }}/releases`, {
+              tag_name: "${{ steps.generate_main_release_tag.outputs.next_release_tag }}",
+              target_commitish: "main",
+              generate_release_notes: true
+            })
+      - name: Generate release tag for product
+        id: generate_product_release_tag
+        if: ${{ github.ref == 'refs/heads/product' }}
+        uses: amitsingh-007/next-release-tag@v5.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          tag_prefix: 'pro-v'
+          tag_template: 'yyyy.mm.dd.i'
+      - name: Create release note for product
+        if: ${{ github.ref == 'refs/heads/product' }}
+        uses: actions/github-script@v4.0.2
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            await github.request(`POST /repos/${{ github.repository }}/releases`, {
+              tag_name: "${{ steps.generate_product_release_tag.outputs.next_release_tag }}",
+              target_commitish: "product",
+              generate_release_notes: true
+            })
+      
