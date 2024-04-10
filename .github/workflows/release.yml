@@ -27,7 +27,8 @@ jobs:
             await github.request(`POST /repos/${{ github.repository }}/releases`, {
               tag_name: "${{ steps.generate_main_release_tag.outputs.next_release_tag }}",
               target_commitish: "main",
-              generate_release_notes: true
+              generate_release_notes: true,
+              make_latest: false
             })
       - name: Generate release tag for product
         id: generate_product_release_tag
@@ -46,6 +47,7 @@ jobs:
             await github.request(`POST /repos/${{ github.repository }}/releases`, {
               tag_name: "${{ steps.generate_product_release_tag.outputs.next_release_tag }}",
               target_commitish: "product",
-              generate_release_notes: true
+              generate_release_notes: true,
+              make_latest: false
             })
       
